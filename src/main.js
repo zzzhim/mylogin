@@ -2,14 +2,16 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './App'
+// 路由的文件引进进来
 import router from './router'
 
-Vue.config.productionTip = false
+// 项目运行的时候，是否开启提示，如果是在调试阶段的话，建议开启，上线后关闭
+Vue.config.productionTip = true
 
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
-  router,
+  router, // 让路由生效
   components: { App },
   template: '<App/>'
 })
