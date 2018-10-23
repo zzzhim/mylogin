@@ -6,7 +6,7 @@ import Vuex from 'vuex'
 import Vue from 'vue'
 // 2.分别引入对应的文件
 import state from './state'
-import mutations from './mutations'
+import mutations from './mutaions'
 import actions from './actions'
 
 // 使得vuex生效

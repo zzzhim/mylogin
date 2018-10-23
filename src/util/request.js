@@ -11,7 +11,7 @@ axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
 // 1.首先创建一个axios的实例,进行请求的一些全局配置
 const service = axios.create({
   // 请求默认发送的主机地址
-  baseURL: 'http://localhost:3000',
+  // baseURL: 'http://localhost:3000',
   // 请求过期的时间
   timeout: 5000
 })
