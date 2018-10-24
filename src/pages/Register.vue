@@ -104,7 +104,18 @@ export default {
             method: 'post',
             data: this.regForm
           }).then( ({ data }) => {
-            console.log(data);
+            // console.log(data);
+            // 拿到数据
+            // let success = data.success; // 成功与否的布尔值
+            // success:成功与否的布尔值 userInfo:用户的信息
+            let { success, message, userInfo } = data;
+            if(success){
+              // 成功后跳转
+              this.$router.push('/login');
+            }else {
+              // 失败后给出错误提示
+              this.$message.success(message);
+            }
           }).catch( err => {
             console.log(err);
           })
