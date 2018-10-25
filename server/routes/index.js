@@ -10,5 +10,13 @@ subRouter.post('/login', UserController.login)
 // 他有没有权限让服务器给它返回数据
 // 如果以后有哪些请求需要登录后才可以得到数据,在路由中加上checkToken
 subRouter.get('/home', checkToken, UserController.home)
+subRouter.post('/addForm', checkToken, UserController.addForms)
+
+subRouter.get('/allUsers', checkToken, UserController.allUsers)
+subRouter.delete('/deletForm', checkToken, UserController.deletForm)
+
+
+
+
 
 module.exports = subRouter

@@ -2,6 +2,9 @@
 const db = require('../model/db')
 //引入user集合
 const User = require('../model/User')
+
+const addForm = require('../model/addForm')
+
 // 引入密码加密模块
 const sha1 = require('sha1')
 // 引入日期格式化模块
@@ -133,8 +136,103 @@ const home = async ctx => {
   ctx.body = '你要的是不是这个'
 }
 
+// 添加
+const addForms = async ctx => {
+  let { username, name, password, phone, email, is_active } = ctx.request.body;
+  let doc = await addForm.getUserByName(username);
+  if(!doc){
+    password = sha1(password)
+    // console.log(password);
+    let date = new Date();
+    let create_time = moment(date).format('YYYY-MM-DD HH:mm:ss') // 当前时间就被格式化为年月日、时分秒了
+    let newUser = new addForm({
+      username,
+      name,
+      password,
+      phone,
+      email,
+      is_active,
+      create_time
+    })
+
+    let userInfo = await new Promise((resolve, reject) => {
+      // 把数据存储到数据库中
+      newUser.save((err, doc) => {
+        if (err) {
+          reject(err) // 错误消息
+        }
+        resolve(doc) // 用户相关信息
+      })
+    })
+
+
+
+    ctx.status = 200 // 设置状态码
+    ctx.body = {  // 返回数据
+      success: true,
+      message: '注册成功',
+      data: userInfo
+    }
+  }else {
+    ctx.status = 200
+    ctx.body = {
+      success: false,
+      message: '用户名不允许重复'
+    }
+  }
+
+}
+
+const allUsers = async ctx => {
+    // 所有数据
+    const allUser = await new Promise((resolve, reject) => {
+      addForm.find({},(err, data) => {
+        if(err){
+          reject(err)
+        }
+        resolve(data)
+      })
+    })
+  ctx.status = 200
+  ctx.body = allUser
+}
+
+const deletForm = async ctx => { // 删除单个数据
+  let username  = ctx.request.body.username
+
+  // addForm.remove({ username : username }).then(data => {
+  //   console.log(data);
+  // })
+  // 删除单个数据
+  const allUser = await new Promise((resolve, reject) => {
+    addForm.remove({ username }, (err) => {
+      if (err) {
+        reject(err)
+      }else {
+        resolve(true)
+      }
+    })
+  })
+  if (allUser) {
+    ctx.status = 200
+    ctx.body = {
+      success: true,
+      message: '删除成功了'
+    }
+  }else {
+    ctx.status = 200
+    ctx.body = {
+      success: false,
+      message: '删除失败了'
+    }
+  }
+}
+
 module.exports = {
   register,
   login,
-  home
+  home,
+  addForms,
+  allUsers,
+  deletForm
 }
