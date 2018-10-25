@@ -106,8 +106,7 @@ export default {
           }).then( ({ data }) => {
             // console.log(data);
             // 拿到数据
-            // let success = data.success; // 成功与否的布尔值
-            // success:成功与否的布尔值 userInfo:用户的信息
+            // success:成功与否的布尔值 userInfo:用户的信息 message:成功或失败提示
             let { success, message, userInfo } = data;
             if(success){
               // 成功后跳转

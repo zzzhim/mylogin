@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 //创建我们的数据库集合的架构
-//这里面，指定集合里面的字段，字段的
+//这里面，指定集合里面的字段名称和字段的类型
 const UserSchema = new mongoose.Schema({
   //常用的数据类型
   //1.string

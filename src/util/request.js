@@ -4,6 +4,7 @@ import axios from 'axios'
 import { Message } from 'element-ui'
 // vuex状态管理
 import store from '@/store'
+import router from '@/router'
 
 //全局发送post请求的默认头部content-type类型,定义类型为JSON格式，并且字符编码为utf-8
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
@@ -31,16 +32,26 @@ service.interceptors.request.use(
 )
 // 请求发送后数据返回的时候的拦截器
 service.interceptors.response.use(
-  response => response,
-  error => {
-    console.log('err' + error)
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
-    })
-    return Promise.reject(error)
+  response => {
+    return response;
+  },
+  error => { //默认除了2XX之外的都是错误的，就会走这里
+    console.log(error.response);
+
+    if (error.response) {
+
+      switch (error.response.status) {
+        case 401:
+          store.dispatch('UserLogOut'); //可能是token过期，清除它
+          router.replace({ //跳转到登录页面
+            path: '/login'
+          });
+      }
+    }
+    return Promise.reject(error.response);
   }
-)
+);
+
+
 
 export default service

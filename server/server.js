@@ -7,6 +7,7 @@ const router = new Router()
 
 // 引入子路由
 const subRouter = require('./routes/index')
+// 所有的/api请求都会到 ./routes/index 里面去处理
 router.use('/api', subRouter.routes(), subRouter.allowedMethods());
 
 app.use(bodyParser())
