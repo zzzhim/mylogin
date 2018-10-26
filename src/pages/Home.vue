@@ -5,48 +5,78 @@
             <!-- Header content -->
             <h1 class="text-center">Vue + Node增删改查</h1>
           </el-header>
-          <el-main height="">
+          <el-main height="" class="main">
             <!-- Main content -->
             <el-row>
               <el-col :span="8" :offset="13">
                 <div class="text-right">
-                  <el-button type="primary" @click="" icon="el-icon-plus" class="button" @click="bool=true">添加</el-button>
-                  <el-button type="danger" @click="" icon="el-icon-delete" class="button">删除</el-button>
+                  <el-button type="primary" icon="el-icon-plus" class="button" @click="bool=true">添加</el-button>
+                  <el-button type="danger" icon="el-icon-delete" class="button" @click="deleteBool=true">删除</el-button>
                 </div>
+              </el-col>
+            </el-row>
+            <!-- 全部删除弹出 -->
+            <!-- 遮罩 -->
+            <div v-show="deleteBool" class="transition-box">
+              <div class="shade" @click="deleteBool=false,$message.success('取消了')"></div>
+              <div class="promptBox">
+                <h1>提示!</h1>
+                <p> <i class="el-icon-warning cor-danger"></i> 此操作为不可逆操作,是否继续?</p>
+                <el-button type="danger" class="button marginButton" @click="deleteBool=false,$message.success('取消了')">取消</el-button>
+                <el-button type="primary" class="button marginButton" @click="deleteAll">确认</el-button>
+              </div>
+            </div>
+            <el-row>
+              <el-col :span="24">
+                <el-table :data="tableData" style="width: 100%" @selection-change="selectionButton">
+                  <el-table-column type="selection" width="55">
+
+                  </el-table-column>
+                  <el-table-column prop="username" label="用户名" width="140">
+                  </el-table-column>
+                  <el-table-column prop="name" label="姓名" width="140" sortable>
+                  </el-table-column>
+                    <el-table-column prop="phone" label="手机" width="180">
+                  </el-table-column>
+                  <el-table-column prop="email"  label="邮箱" width="200">
+                  </el-table-column>
+                  <el-table-column  prop="create_time" label="注册日期" width="400" sortable>
+                  </el-table-column>
+                  <el-table-column prop="is_active" label="状态" width="200">
+                    <template slot-scope="scope">
+                      <el-tag :type="scope.row.is_active==true?'success':'danger'">
+                        {{scope.row.is_active==true?'启用':'停用'}}
+                      </el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="操作" width="180">
+                    <template slot-scope="scope">
+                      <el-button type="success" size="small" @click="compile=true,storage=scope.row.username">编辑</el-button>
+                      <el-button type="danger" size="small" @click="deleteBools=true,deleteStorage=scope.row.username">删除</el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
               </el-col>
             </el-row>
             <el-row>
               <el-col :span="24">
-                    <el-table :data="tableData" style="width: 100%">
-                      <el-table-column type="selection" width="55">
-
-                      </el-table-column>
-                      <el-table-column prop="username" label="用户名" width="140">
-                      </el-table-column>
-                      <el-table-column prop="name" label="姓名" width="140" sortable>
-                      </el-table-column>
-                        <el-table-column prop="phone" label="手机" width="180">
-                      </el-table-column>
-                      <el-table-column prop="email"  label="邮箱" width="200">
-                      </el-table-column>
-                      <el-table-column  prop="create_time" label="注册日期" width="400" sortable>
-                      </el-table-column>
-                      <el-table-column prop="is_active" label="状态" width="200">
-                        <template slot-scope="scope">
-                          <el-tag :type="scope.row.is_active==true?'success':'danger'">
-                            {{scope.row.is_active==true?'启用':'停用'}}
-                          </el-tag>
-                        </template>
-                      </el-table-column>
-                      <el-table-column label="操作" width="180">
-                        <template slot-scope="scope">
-                          <el-button type="success" size="small" @click="compile=true,storage=scope.row.username">编辑</el-button>
-                          <el-button type="danger" size="small" @click="deletForm(scope.row.username)">删除</el-button>
-                        </template>
-                      </el-table-column>
-                    </el-table>
+                <div class="block">
+                  <el-pagination layout="prev,pager,next" :total="total" :page-size="5" @current-change="">
+                  </el-pagination>
+                </div>
               </el-col>
             </el-row>
+            <!-- 全部删除弹出 -->
+            <!-- 遮罩 -->
+            <div v-show="deleteBools" class="transition-box">
+              <div class="shade" @click="deleteBools=false,$message.success('取消了')"></div>
+              <div class="promptBox">
+                <h1>提示!</h1>
+                <p> <i class="el-icon-warning cor-danger"></i> 此操作为不可逆操作,是否继续?</p>
+                <el-button type="danger" class="button marginButton" @click="deleteBools=false,$message.success('取消了')">取消</el-button>
+                <el-button type="primary" class="button marginButton" @click="deletForm()">确认</el-button>
+              </div>
+            </div>
             <!-- 动画 -->
             <!-- 添加用户 -->
             <transition name="el-fade-in-linear">
@@ -80,7 +110,7 @@
                       </el-form-item>
                       <el-form-item>
                         <el-button type="primary" @click="submitForm('addForm')">提交</el-button>
-                        <el-button type="danger"  @click="resetForm('addForm')">取消</el-button>
+                        <el-button type="danger"  @click="resetForm('addForm'),$message.success('取消添加用户了')">取消</el-button>
                       </el-form-item>
                     </el-form>
                   </div>
@@ -106,7 +136,7 @@
                     </el-form-item>
                     <el-form-item>
                       <el-button type="primary" @click="updataForms('updataForm')">修改</el-button>
-                      <el-button type="danger"  @click="resetForm('updataForm')">取消</el-button>
+                      <el-button type="danger"  @click="resetForm('updataForm'),$message.success('取消编辑了')">取消</el-button>
                     </el-form-item>
                   </el-form>
               </div>
@@ -160,6 +190,9 @@
         return {
           bool: false,
           compile: false,
+          deleteBool: false,
+          deleteBools: false,
+          deleteStorage: null,
           storage: null, // 暂存
           tableData: [],
           addForm: {
@@ -204,9 +237,19 @@
               {validator:addEmail, tigger:'blur'}
             ]
           },
+          total:1,
+          multipleSelection: []
         }
       },
       methods: {
+        selectionButton(val) {
+          let arr = []
+          val.forEach(element => {
+            arr.push(element.username)
+          })
+          this.multipleSelection = arr
+          // console.log(this.multipleSelection)
+        },
         resetForm(formName) { // 重置表单
           this.$refs[formName].resetFields()
           this.bool = false
@@ -275,12 +318,12 @@
             this.tableData = data
           })
         },
-        deletForm(ele) { // 删除单个数据
+        deletForm() { // 删除单个数据
           request({
             url: '/api/deletForm',
             method: 'delete',
             data: {
-              username: ele
+              username: this.deleteStorage
             }
           }).then(({ data }) => {
             if(data.success) {
@@ -289,6 +332,25 @@
             }else {
               this.$message.success(data.message);
             }
+            this.deleteBools = false
+            this.deleteStorage = null
+          })
+        },
+        deleteAll() { // 删除全部功能
+           request({
+            url: '/api/deletAll',
+            method: 'delete',
+            data: {
+              username: this.multipleSelection
+            }
+          }).then(({ data }) => {
+            if(data.success) {
+              this.$message.success(data.message);
+              this.getUsers()
+            }else {
+              this.$message.success(data.message);
+            }
+            this.deleteBool = false
           })
         }
       },
@@ -305,14 +367,20 @@
     }
 </script>
 
-<style scoped type="scss">
+<style scoped>
+  .block {
+    margin: 20px 0px;
+  }
+  .main {
+    z-index: 10;
+  }
   .header {
     margin: 20px 0px;
   }
   .button {
     padding: 8px 10px;
   }
-  /* .shade {
+  .shade {
     position: absolute;
     top: 0;
     left: 0;
@@ -320,7 +388,7 @@
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 99;
-  } */
+  }
   .popups {
     width: 800px;
     height: 600px;
@@ -337,5 +405,34 @@
   }
   .title {
     margin-bottom: 40px;
+  }
+  .promptBox {
+    width: 300px;
+    height: 120px;
+    padding: 10px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    margin: auto;
+    z-index: 110;
+    background-color: #fff;
+    box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.1);
+    text-align: right;
+  }
+  .promptBox h1 {
+    text-align: left;
+    font-size: 20px;
+  }
+  .promptBox p {
+    text-align: center;
+    margin: 10px 0px;
+  }
+  .marginButton {
+    margin-top: 10px;
+  }
+  .cor-danger {
+    color:  #f56c6c;
   }
 </style>

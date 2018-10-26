@@ -178,7 +178,6 @@ const addForms = async ctx => {
       message: '用户名不允许重复'
     }
   }
-
 }
 
 const allUsers = async ctx => {
@@ -211,6 +210,7 @@ const deletForm = async ctx => { // 删除单个数据
       }
     })
   })
+
   if (allUser) {
     ctx.status = 200
     ctx.body = {
@@ -227,13 +227,8 @@ const deletForm = async ctx => { // 删除单个数据
 }
 
 const updataForm = async ctx => { // 修改数据
-  // console.log(ctx.request.body);
-  let { username, name, phone, email, is_active } = ctx.request.body
-  // MyModel.update({ name: 'Tobi' }, { ferret: true }, { multi: true }, function (err, raw) {
-  //   if (err) return handleError(err);
-  //   console.log('The raw response from Mongo was ', raw);
-  // });
 
+  let { username, name, phone, email, is_active } = ctx.request.body
   // 修改
   const updata = await new Promise((resolve, reject) => {
     addForm.update({ username }, { name, phone, email, is_active }, (err, raw) => {
@@ -257,7 +252,26 @@ const updataForm = async ctx => { // 修改数据
       message: '修改失败了'
     }
   }
+}
 
+const deletAll = async ctx => {
+  let username = ctx.request.body.username
+
+  username.forEach(element => {
+    addForm.remove({ username }).then(data => {
+      ctx.status = 200
+      ctx.body = {
+        success: false,
+        message: '删除成功了'
+      }
+    }).catch(err => {
+      ctx.status = 200
+      ctx.body = {
+        success: true,
+        message: '删除失败了了'
+      }
+    })
+  });
 }
 
 module.exports = {
@@ -267,5 +281,6 @@ module.exports = {
   addForms,
   allUsers,
   deletForm,
-  updataForm
+  updataForm,
+  deletAll
 }
