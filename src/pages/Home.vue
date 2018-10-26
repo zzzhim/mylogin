@@ -40,7 +40,7 @@
                       </el-table-column>
                       <el-table-column label="操作" width="180">
                         <template slot-scope="scope">
-                          <el-button type="success" size="small" @click="">编辑</el-button>
+                          <el-button type="success" size="small" @click="compile=true,storage=scope.row.username">编辑</el-button>
                           <el-button type="danger" size="small" @click="deletForm(scope.row.username)">删除</el-button>
                         </template>
                       </el-table-column>
@@ -48,6 +48,7 @@
               </el-col>
             </el-row>
             <!-- 动画 -->
+            <!-- 添加用户 -->
             <transition name="el-fade-in-linear">
               <div v-show="bool" class="transition-box">
                 <el-container>
@@ -84,6 +85,30 @@
                     </el-form>
                   </div>
                 </el-container>
+              </div>
+            </transition>
+            <!-- 编辑 -->
+            <transition name="el-fade-in-linear">
+              <div v-show="compile" class="transition-box popups">
+                  <h1 class="title">添加新用户</h1>
+                  <el-form :label-position="'right'" :rules="addRules" label-width="80px" :model="updataForm" ref="updataForm">
+                    <el-form-item label="姓名" prop="name">
+                      <el-input v-model="updataForm.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="手机" prop="phone">
+                      <el-input v-model="updataForm.phone"></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮箱" prop="email">
+                      <el-input v-model="updataForm.email"></el-input>
+                    </el-form-item>
+                    <el-form-item label="是否启用">
+                      <el-switch v-model="updataForm.is_active"></el-switch>
+                    </el-form-item>
+                    <el-form-item>
+                      <el-button type="primary" @click="updataForms('updataForm')">修改</el-button>
+                      <el-button type="danger"  @click="resetForm('updataForm')">取消</el-button>
+                    </el-form-item>
+                  </el-form>
               </div>
             </transition>
           </el-main>
@@ -134,6 +159,8 @@
         };
         return {
           bool: false,
+          compile: false,
+          storage: null, // 暂存
           tableData: [],
           addForm: {
             username: '', //用户名
@@ -143,6 +170,12 @@
             phone: '', //电话
             email: '', //邮箱
             is_active: true //状态
+          },
+          updataForm: {
+            name: '',
+            phone: '',
+            email: '',
+            is_active: false
           },
           // 添加用户校验
           addRules: {
@@ -177,6 +210,7 @@
         resetForm(formName) { // 重置表单
           this.$refs[formName].resetFields()
           this.bool = false
+          this.compile = false
         },
         submitForm(formName) { // 提交表单
           // console.log(this.addForm);
@@ -197,10 +231,39 @@
                 //   email,
                 //   is_active
                 // })
-                this.getUsers()
+                if(data.success){
+                  this.getUsers()
+                }else {
+                  this.$message.success(data.message);
+                }
                 this.$refs[formName].resetFields()
               })
               this.bool = false
+            }
+          })
+        },
+        updataForms(formName) {
+          this.$refs[formName].validate((valid) => {
+            if(valid){
+              // console.log(formName)
+              // console.log(this.storage)
+              let obj = this.updataForm
+              obj.username = this.storage
+              request({
+                url: '/api/updataForm',
+                method: 'post',
+                data: obj
+              }).then(({ data }) => {
+                // console.log(data)
+                if(data.success){
+                  this.$message.success(data.message);
+                  this.getUsers()
+                }else {
+                  this.$message.success(data.message);
+                }
+                this.compile = false
+                this.$refs[formName].resetFields()
+              })
             }
           })
         },
@@ -220,7 +283,6 @@
               username: ele
             }
           }).then(({ data }) => {
-            // console.log(data);
             if(data.success) {
               this.$message.success(data.message);
               this.getUsers()
@@ -237,6 +299,7 @@
         }).then(({ data }) => {
           this.$message.success('恭喜你成功登录了');
         })
+        // 获取全部数据
         this.getUsers()
       },
     }

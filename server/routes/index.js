@@ -15,8 +15,6 @@ subRouter.post('/addForm', checkToken, UserController.addForms)
 subRouter.get('/allUsers', checkToken, UserController.allUsers)
 subRouter.delete('/deletForm', checkToken, UserController.deletForm)
 
-
-
-
+subRouter.post('/updataForm', checkToken, UserController.updataForm)
 
 module.exports = subRouter

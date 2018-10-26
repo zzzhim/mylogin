@@ -165,8 +165,6 @@ const addForms = async ctx => {
       })
     })
 
-
-
     ctx.status = 200 // 设置状态码
     ctx.body = {  // 返回数据
       success: true,
@@ -228,11 +226,46 @@ const deletForm = async ctx => { // 删除单个数据
   }
 }
 
+const updataForm = async ctx => { // 修改数据
+  // console.log(ctx.request.body);
+  let { username, name, phone, email, is_active } = ctx.request.body
+  // MyModel.update({ name: 'Tobi' }, { ferret: true }, { multi: true }, function (err, raw) {
+  //   if (err) return handleError(err);
+  //   console.log('The raw response from Mongo was ', raw);
+  // });
+
+  // 修改
+  const updata = await new Promise((resolve, reject) => {
+    addForm.update({ username }, { name, phone, email, is_active }, (err, raw) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(raw);
+      }
+    })
+  })
+  if (updata) {
+    ctx.status = 200
+    ctx.body = {
+      success: true,
+      message: '修改成功了'
+    }
+  }else {
+    ctx.status = 200
+    ctx.body = {
+      success: false,
+      message: '修改失败了'
+    }
+  }
+
+}
+
 module.exports = {
   register,
   login,
   home,
   addForms,
   allUsers,
-  deletForm
+  deletForm,
+  updataForm
 }
