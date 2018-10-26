@@ -11,8 +11,8 @@ const checkToken = require('../token/checkToken')
 
 // 请求
 subRouter.get('/home', checkToken, UserController.home)
-subRouter.get('/allUsers', checkToken, UserController.allUsers)
 // 修改
+subRouter.post('/allUsers', checkToken, UserController.allUsers)
 subRouter.post('/register', UserController.register)
 subRouter.post('/login', UserController.login)
 subRouter.post('/addForm', checkToken, UserController.addForms)

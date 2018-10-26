@@ -30,6 +30,16 @@ UserSchema.statics = {
       })
     })
   },
+  getCouns() {
+    return new Promise((resolve, reject) => {
+      User.count({}, (err, count) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(count);
+      })
+    })
+  }
   // removeUserName(username) {
   //   return new Promise((resolve, reject) => {
   //     User.remove(username, error => {

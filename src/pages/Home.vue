@@ -61,7 +61,11 @@
             <el-row>
               <el-col :span="24">
                 <div class="block">
-                  <el-pagination layout="prev,pager,next" :total="total" :page-size="5" @current-change="">
+                  <el-pagination
+                    :page-size="5"
+                    layout="prev, pager, next"
+                    :total="10"
+                    @current-change="pageChange">
                   </el-pagination>
                 </div>
               </el-col>
@@ -193,6 +197,7 @@
           deleteBool: false,
           deleteBools: false,
           deleteStorage: null,
+          total:null,
           storage: null, // 暂存
           tableData: [],
           addForm: {
@@ -237,18 +242,19 @@
               {validator:addEmail, tigger:'blur'}
             ]
           },
-          total:1,
           multipleSelection: []
         }
       },
       methods: {
+        pageChange(val) {
+          this.getUsers(val)
+        },
         selectionButton(val) {
           let arr = []
           val.forEach(element => {
             arr.push(element.username)
           })
           this.multipleSelection = arr
-          // console.log(this.multipleSelection)
         },
         resetForm(formName) { // 重置表单
           this.$refs[formName].resetFields()
@@ -310,12 +316,20 @@
             }
           })
         },
-        getUsers() { // 获取全部数据
+        getUsers(num) { // 获取全部数据
+          let page =  num || 1
           request({
             url: '/api/allUsers',
-            method: 'get'
+            method: 'post',
+            data: {
+              page,
+              pageSize: 5
+            }
           }).then(({ data }) => {
-            this.tableData = data
+            this.total = data.allCount
+            this.tableData = data.allUser
+          }).catch(err => {
+            console.log(err);
           })
         },
         deletForm() { // 删除单个数据

@@ -181,17 +181,28 @@ const addForms = async ctx => {
 }
 
 const allUsers = async ctx => {
-    // 所有数据
-    const allUser = await new Promise((resolve, reject) => {
-      addForm.find({},(err, data) => {
-        if(err){
-          reject(err)
-        }
-        resolve(data)
-      })
+  const page = parseInt(ctx.request.body.page)
+  const pageSize = parseInt(ctx.request.body.pageSize)
+  const skip = (page - 1) * pageSize
+  console.log(ctx.request.body);
+
+
+  // limit 要返回的最大结果数
+  // skip 指定要跳过的文档数。
+  // sort 排序顺序
+  // exec 执行查询
+  const allUser = await new Promise((resolve, reject) => {
+    addForm.find({}).sort({ 'create_time': -1 }).skip(skip).limit(pageSize).exec().then(data => {
+      resolve(data)
     })
+  })
+  const allCount = await addForm.getCouns()
+
   ctx.status = 200
-  ctx.body = allUser
+  ctx.body = {
+    allUser,
+    allCount
+  }
 }
 
 const deletForm = async ctx => { // 删除单个数据
