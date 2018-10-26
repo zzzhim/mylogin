@@ -58,13 +58,14 @@
                 </el-table>
               </el-col>
             </el-row>
+            <!-- 分页 -->
             <el-row>
               <el-col :span="24">
                 <div class="block">
                   <el-pagination
                     :page-size="5"
                     layout="prev, pager, next"
-                    :total="10"
+                    :total="total"
                     @current-change="pageChange">
                   </el-pagination>
                 </div>
@@ -197,7 +198,7 @@
           deleteBool: false,
           deleteBools: false,
           deleteStorage: null,
-          total:null,
+          total:0,
           storage: null, // 暂存
           tableData: [],
           addForm: {
@@ -246,7 +247,7 @@
         }
       },
       methods: {
-        pageChange(val) {
+        pageChange(val) { // 分页
           this.getUsers(val)
         },
         selectionButton(val) {
@@ -358,6 +359,7 @@
               username: this.multipleSelection
             }
           }).then(({ data }) => {
+
             if(data.success) {
               this.$message.success(data.message);
               this.getUsers()
@@ -384,6 +386,7 @@
 <style scoped>
   .block {
     margin: 20px 0px;
+    text-align: center;
   }
   .main {
     z-index: 10;

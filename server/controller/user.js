@@ -136,8 +136,7 @@ const home = async ctx => {
   ctx.body = '你要的是不是这个'
 }
 
-// 添加
-const addForms = async ctx => {
+const addForms = async ctx => { // 添加
   let { username, name, password, phone, email, is_active } = ctx.request.body;
   let doc = await addForm.getUserByName(username);
   if(!doc){
@@ -180,12 +179,10 @@ const addForms = async ctx => {
   }
 }
 
-const allUsers = async ctx => {
+const allUsers = async ctx => { // 查询数据 并且分页
   const page = parseInt(ctx.request.body.page)
   const pageSize = parseInt(ctx.request.body.pageSize)
   const skip = (page - 1) * pageSize
-  console.log(ctx.request.body);
-
 
   // limit 要返回的最大结果数
   // skip 指定要跳过的文档数。
@@ -197,7 +194,6 @@ const allUsers = async ctx => {
     })
   })
   const allCount = await addForm.getCouns()
-
   ctx.status = 200
   ctx.body = {
     allUser,
@@ -208,19 +204,8 @@ const allUsers = async ctx => {
 const deletForm = async ctx => { // 删除单个数据
   let username  = ctx.request.body.username
 
-  // addForm.remove({ username : username }).then(data => {
-  //   console.log(data);
-  // })
   // 删除单个数据
-  const allUser = await new Promise((resolve, reject) => {
-    addForm.remove({ username }, (err) => {
-      if (err) {
-        reject(err)
-      }else {
-        resolve(true)
-      }
-    })
-  })
+  const allUser = await addForm.removeUserName({ username });
 
   if (allUser) {
     ctx.status = 200
@@ -241,15 +226,8 @@ const updataForm = async ctx => { // 修改数据
 
   let { username, name, phone, email, is_active } = ctx.request.body
   // 修改
-  const updata = await new Promise((resolve, reject) => {
-    addForm.update({ username }, { name, phone, email, is_active }, (err, raw) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(raw);
-      }
-    })
-  })
+  const updata = await addForm.updateForm({ username }, { name, phone, email, is_active })
+
   if (updata) {
     ctx.status = 200
     ctx.body = {
@@ -265,24 +243,28 @@ const updataForm = async ctx => { // 修改数据
   }
 }
 
-const deletAll = async ctx => {
+const deletAll = async ctx => { // 删除多个数据
   let username = ctx.request.body.username
 
-  username.forEach(element => {
+  const bool = await new Promise((resolve, reject) => {
     addForm.remove({ username }).then(data => {
-      ctx.status = 200
-      ctx.body = {
-        success: false,
-        message: '删除成功了'
-      }
-    }).catch(err => {
-      ctx.status = 200
-      ctx.body = {
-        success: true,
-        message: '删除失败了了'
-      }
+      resolve(data)
     })
-  });
+  })
+
+  if (bool) {
+    ctx.status = 200
+    ctx.body = {
+      success: true,
+      message: '删除成功了'
+    }
+  } else {
+    ctx.status = 200
+    ctx.body = {
+      success: false,
+      message: '删除失败了'
+    }
+  }
 }
 
 module.exports = {

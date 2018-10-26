@@ -19,7 +19,7 @@ const UserSchema = new mongoose.Schema({
 })
 //可以添加一些自定义的实例方法
 UserSchema.statics = {
-  getUserByName: function (username) {
+  getUserByName: function (username) { // 查询数据是否存在
     return new Promise((resolve, reject) => {
       User.findOne({ username }, (err, doc) => {
         if (err) {
@@ -31,7 +31,7 @@ UserSchema.statics = {
     })
   },
   getCouns() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => { // 查询数据库中文档总数
       User.count({}, (err, count) => {
         if (err) {
           reject(err);
@@ -39,17 +39,29 @@ UserSchema.statics = {
         resolve(count);
       })
     })
+  },
+  updateForm(username, parameter) { // 修改数据
+    return new Promise((resolve, reject) => {
+      User.update(username, parameter, (err, raw) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(raw);
+        }
+      })
+    })
+  },
+  removeUserName(username) { // 删除数据
+    return new Promise((resolve, reject) => {
+      User.remove(username, (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(true)
+        }
+      })
+    })
   }
-  // removeUserName(username) {
-  //   return new Promise((resolve, reject) => {
-  //     User.remove(username, error => {
-  //       if(error){
-  //         reject(error)
-  //       }
-  //       resolve('删除成功')
-  //     })
-  //   })
-  // }
 }
 
 //生成模型，说白了就是创建一个集合
@@ -59,8 +71,3 @@ const User = mongoose.model('addFrom', UserSchema);
 //暴漏一个集合
 module.exports = User;
 
-//所有的操作都是再User模型上的，
-//例如查询的时候是User.find()/findOne()
-//例如修改的时候User.update()
-//删除的时候User.dalete()
-//添加的时候 let newUser = new User() ---> newUser.save()
