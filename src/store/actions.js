@@ -8,7 +8,7 @@ const actions = {
   },
   UserLogOut({ commit }) {
     commit('LOGOUT')
-  }
+  },
 }
 
 export default actions

@@ -68,6 +68,6 @@ UserSchema.statics = {
 //第一个参数是模型的名字 ，集合的名字
 //第二个参数是集合使用的架构
 const User = mongoose.model('addFrom', UserSchema);
-//暴漏一个集合
+//暴露一个集合
 module.exports = User;
 

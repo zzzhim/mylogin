@@ -12,6 +12,15 @@
                 <div class="text-right">
                   <el-button type="primary" icon="el-icon-plus" class="button" @click="bool=true">添加</el-button>
                   <el-button type="danger" icon="el-icon-delete" class="button" @click="deleteBool=true">删除</el-button>
+                  <el-dropdown class="text-right" @command="handleCommand">
+                    <span class="el-dropdown-link">
+                      {{ USERNAME }}
+                      <i class="el-icon-arrow-down el-icon--right"></i>
+                    </span>
+                    <el-dropdown-menu slot="dropdown" >
+                      <el-dropdown-item  command="exit">退出</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </el-dropdown>
                 </div>
               </el-col>
             </el-row>
@@ -153,6 +162,7 @@
 
 <script>
     import request from '../util/request.js'
+    import store from '@/store'
 
     export default {
       name: 'Home',
@@ -198,6 +208,7 @@
           deleteBool: false,
           deleteBools: false,
           deleteStorage: null,
+          USERNAME: null,
           total:0,
           storage: null, // 暂存
           tableData: [],
@@ -359,7 +370,6 @@
               username: this.multipleSelection
             }
           }).then(({ data }) => {
-
             if(data.success) {
               this.$message.success(data.message);
               this.getUsers()
@@ -368,9 +378,17 @@
             }
             this.deleteBool = false
           })
+        },
+        handleCommand(command) {
+          if(command == 'exit') {
+            store.dispatch('UserLogOut')
+            this.$router.push('/login')
+          }
         }
       },
       mounted() {
+        this.USERNAME = window.sessionStorage.getItem('username');
+
         request({
           url: '/api/home',
           method: 'get'
@@ -384,6 +402,7 @@
 </script>
 
 <style scoped>
+
   .block {
     margin: 20px 0px;
     text-align: center;

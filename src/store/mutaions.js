@@ -12,7 +12,7 @@ const mutations = {
   LOGOUT: (state, data) => {
     state.token = null;
     window.sessionStorage.removeItem('token')
-  }
+  },
 }
 
 export default mutations

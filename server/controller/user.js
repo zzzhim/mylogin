@@ -207,14 +207,13 @@ const deletForm = async ctx => { // 删除单个数据
   // 删除单个数据
   const allUser = await addForm.removeUserName({ username });
 
+  ctx.status = 200
   if (allUser) {
-    ctx.status = 200
     ctx.body = {
       success: true,
       message: '删除成功了'
     }
   }else {
-    ctx.status = 200
     ctx.body = {
       success: false,
       message: '删除失败了'
@@ -225,46 +224,52 @@ const deletForm = async ctx => { // 删除单个数据
 const updataForm = async ctx => { // 修改数据
 
   let { username, name, phone, email, is_active } = ctx.request.body
-  // 修改
-  const updata = await addForm.updateForm({ username }, { name, phone, email, is_active })
 
-  if (updata) {
-    ctx.status = 200
-    ctx.body = {
-      success: true,
-      message: '修改成功了'
+  let doc = await addForm.getUserByName(username);
+
+  ctx.status = 200
+  if(doc){
+    // 修改
+    const updata = await addForm.updateForm({ username }, { name, phone, email, is_active })
+
+    if (updata) {
+      ctx.body = {
+        success: true,
+        message: '修改成功了'
+      }
+    } else {
+      ctx.body = {
+        success: false,
+        message: '修改失败了'
+      }
     }
   }else {
-    ctx.status = 200
     ctx.body = {
       success: false,
-      message: '修改失败了'
+      message: '用户名不存在'
     }
   }
+
 }
 
 const deletAll = async ctx => { // 删除多个数据
   let username = ctx.request.body.username
+  await addForm.remove({ username }).then(data => {
 
-  const bool = await new Promise((resolve, reject) => {
-    addForm.remove({ username }).then(data => {
-      resolve(data)
-    })
+    ctx.status = 200
+
+    if (data) {
+      ctx.body = {
+        success: true,
+        message: '删除成功了'
+      }
+    } else {
+      ctx.body = {
+        success: false,
+        message: '删除失败了'
+      }
+    }
   })
-
-  if (bool) {
-    ctx.status = 200
-    ctx.body = {
-      success: true,
-      message: '删除成功了'
-    }
-  } else {
-    ctx.status = 200
-    ctx.body = {
-      success: false,
-      message: '删除失败了'
-    }
-  }
 }
 
 module.exports = {
