@@ -17,9 +17,14 @@ subRouter.post('/register', UserController.register)
 subRouter.post('/login', UserController.login)
 subRouter.post('/addForm', checkToken, UserController.addForms)
 subRouter.post('/updataForm', checkToken, UserController.updataForm)
+subRouter.post('/HomeImg', checkToken, UserController.HomeImg)
+// subRouter.post('/homes', checkToken, UserController.homes)
+
+
 // 删除
 subRouter.delete('/deletForm', checkToken, UserController.deletForm)
 subRouter.delete('/deletAll', checkToken, UserController.deletAll)
+
 
 
 module.exports = subRouter

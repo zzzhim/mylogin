@@ -12,6 +12,10 @@
                 <div class="text-right">
                   <el-button type="primary" icon="el-icon-plus" class="button" @click="bool=true">添加</el-button>
                   <el-button type="danger" icon="el-icon-delete" class="button" @click="deleteBool=true">删除</el-button>
+                  <el-button type="danger" icon="el-icon-delete" class="button" @click="boolImg=true">更换头像</el-button>
+                  <div class="pathImg">
+                    <img :src="pathImg" alt="">
+                  </div>
                   <el-dropdown class="text-right" @command="handleCommand">
                     <span class="el-dropdown-link">
                       {{ USERNAME }}
@@ -157,12 +161,51 @@
             </transition>
           </el-main>
       </el-container>
+      <div class="shade" v-if="boolImg">
+          <div class="popups">
+            <div class="cropper">
+              <vueCropper
+                ref="cropper"
+                :img="option.img"
+                :outputSize="option.size"
+                :outputType="option.outputType"
+                :info="true"
+                :fixedBox="true"
+                :autoCrop="true"
+                :autoCropWidth="100"
+                :autoCropHeight="100"
+              ></vueCropper>
+            </div>
+            <div class="text-center">
+              <el-upload
+                class="upload-demo"
+                :style="{ 'display': 'inline-block', 'margin': '10px' }"
+                action="/api/homes"
+                ref="upload"
+                :headers="myheaders"
+                :multiple="false"
+                :show-file-list="false"
+                :limit="1"
+                :auto-upload="false"
+                :on-change="imgUpload"
+                >
+                <el-button size="small" type="primary">点击上传</el-button>
+              </el-upload>
+              <el-button type="danger" class="button" :style="{ 'margin': '10px 0px' }" @click="kaishi">开始截图</el-button>
+              <el-button size="small" type="primary" @click="boolImg=false">取消上传</el-button>
+            </div>
+
+          </div>
+      </div>
+
+
     </div>
 </template>
 
 <script>
     import request from '../util/request.js'
     import store from '@/store'
+    import { VueCropper }  from 'vue-cropper'
 
     export default {
       name: 'Home',
@@ -202,7 +245,11 @@
             callback();
           }
         };
+        let token =  window.sessionStorage.getItem('token')
+
         return {
+          myheaders: {'X-Token': token,'Accept': 'image/*'},
+          boolImg: false,
           bool: false,
           compile: false,
           deleteBool: false,
@@ -254,7 +301,14 @@
               {validator:addEmail, tigger:'blur'}
             ]
           },
-          multipleSelection: []
+          multipleSelection: [],
+          crap: false,
+          option: {
+            img: null,
+            size: 1,
+            outputType: 'jpeg',
+          },
+          pathImg: null
         }
       },
       methods: {
@@ -330,16 +384,19 @@
         },
         getUsers(num) { // 获取全部数据
           let page =  num || 1
+          const username = window.sessionStorage.getItem('username')
           request({
             url: '/api/allUsers',
             method: 'post',
             data: {
               page,
-              pageSize: 5
+              pageSize: 5,
+              username
             }
           }).then(({ data }) => {
             this.total = data.allCount
             this.tableData = data.allUser
+            this.pathImg = data.HeadPortrait
           }).catch(err => {
             console.log(err);
           })
@@ -384,11 +441,36 @@
             store.dispatch('UserLogOut')
             this.$router.push('/login')
           }
+        },
+        kaishi() {
+          const username = window.sessionStorage.getItem('username')
+          this.$refs.cropper.getCropData((data) => {
+            request({
+              url: '/api/HomeImg',
+              method: 'post',
+              data: {
+                data,
+                username
+              }
+            }).then(({ data }) => {
+              this.getUsers()
+              // this.pathImg = data.path
+              // console.log(this.pathImg);
+              this.boolImg = false
+              this.$message.success(data.message);
+            })
+          })
+        },
+        imgUpload(file) {
+          // 获取图片地址
+          let imgUrl = URL.createObjectURL(file.raw)
+          this.option.img = imgUrl
+          // 清空已上传图片
+          this.$refs.upload.clearFiles()
         }
       },
       mounted() {
         this.USERNAME = window.sessionStorage.getItem('username');
-
         request({
           url: '/api/home',
           method: 'get'
@@ -397,6 +479,9 @@
         })
         // 获取全部数据
         this.getUsers()
+      },
+      components: {
+        VueCropper,
       },
     }
 </script>
@@ -470,5 +555,85 @@
   }
   .cor-danger {
     color:  #f56c6c;
+  }
+  .cropper-content{
+    display: flex;
+    justify-content: flex-end;
+    -webkit-justify-content: flex-end;
+  }
+  .cropper{
+    width: 350px;
+    height: 300px;
+    display: inline-block;
+    margin-left: 50%;
+    transform:  translateX(-50%);
+  }
+  .show-preview{
+    flex: 1;
+    -webkit-flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+  .preview{
+    overflow: hidden;
+    border-radius: 50%;
+    border:1px solid #cccccc;
+    background: #cccccc;
+    margin-left: 40px;
+  }
+  .footer-btn{
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+    -webkit-justify-content: flex-end;
+  }
+
+  .scope-btn{
+    width: 350px;
+    display: flex;
+    justify-content: space-between;
+    -webkit-justify-content: space-between;
+  }
+  .upload-btn{
+    flex: 1;
+    -webkit-flex: 1;
+    display: flex;
+    justify-content: center;
+    -webkit-justify-content: center;
+  }
+  .btn {
+    outline: none;
+    display: inline-block;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-appearance: none;
+    text-align: center;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    outline: 0;
+    margin: 0;
+    -webkit-transition: .1s;
+    transition: .1s;
+    font-weight: 500;
+    padding: 8px 15px;
+    font-size: 12px;
+    border-radius: 3px;
+    color: #fff;
+    background-color: #67c23a;
+    border-color: #67c23a;
+  }
+  .pathImg {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    position: relative;
+    top: 10px;
+  }
+  .pathImg img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
   }
 </style>

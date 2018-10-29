@@ -11,6 +11,11 @@ const sha1 = require('sha1')
 const moment = require('moment')
 // 引入创建token的方法
 const createToken = require('../token/createToken')
+const getDate = require('../module/date')
+
+const fs = require('fs');
+
+
 
 //处理post请求/reigster的处理函数
 //因为这个处理函数需要将用户名，密码写入数据库，所以额，我们需要在
@@ -22,6 +27,7 @@ const register = async ctx => {
   let password = ctx.request.body.password;
   // 查询数据库是否存在username用户
   let doc = await User.getUserByName(username);
+
   if (doc) {
     //说明数据库有重名的用户
     //1.判断数据库是否有同名的用户，如果存在则不允许注册
@@ -48,12 +54,14 @@ const register = async ctx => {
     let create_time = moment(date).format('YYYY-MM-DD HH:mm:ss') // 当前时间就被格式化为年月日、时分秒了
     // 生成token
     let token = createToken(username)
+    const HeadPortrait = '1.jpg'
     // 创建新用户
     let newUser = new User({
       username,
       password,
       token,
-      create_time
+      create_time,
+      HeadPortrait
     })
     // 将新用户保存到User集合里面
     let userInfo = await new Promise((resolve, reject) => {
@@ -182,8 +190,13 @@ const addForms = async ctx => { // 添加
 const allUsers = async ctx => { // 查询数据 并且分页
   const page = parseInt(ctx.request.body.page)
   const pageSize = parseInt(ctx.request.body.pageSize)
+  const { username } = ctx.request.body
   const skip = (page - 1) * pageSize
 
+  let doc = await User.getUserByName(username);
+  console.log(doc);
+
+  const HeadPortrait = 'http://localhost:3000/imgs/' + doc.HeadPortrait
   // limit 要返回的最大结果数
   // skip 指定要跳过的文档数。
   // sort 排序顺序
@@ -197,7 +210,8 @@ const allUsers = async ctx => { // 查询数据 并且分页
   ctx.status = 200
   ctx.body = {
     allUser,
-    allCount
+    allCount,
+    HeadPortrait
   }
 }
 
@@ -272,6 +286,32 @@ const deletAll = async ctx => { // 删除多个数据
   })
 }
 
+const HomeImg = async ctx => {
+  const { username } = ctx.request.body
+  const base64 = ctx.request.body.data.replace(/^data:image\/\w+;base64,/, "")//去掉图片base64码前面部分data:image/png;base64
+  const dataBuffer = new Buffer(base64, 'base64') //把base64码转成buffer对象，
+  // console.log('dataBuffer是否是Buffer对象：' + Buffer.isBuffer(dataBuffer));
+
+  let fileName = getDate()
+  let doc = await User.getUserByName(username);
+  if (doc) {
+    // 修改
+    await User.updateForm({ username }, { HeadPortrait: fileName })
+  }
+
+  fs.writeFile('./statics/imgs/' + fileName, dataBuffer, function (err) {
+    if (err) {
+      console.log(err)
+    }
+  });
+
+  ctx.body = {
+    success: true,
+    message: '上传成功',
+  }
+}
+
+
 module.exports = {
   register,
   login,
@@ -280,5 +320,6 @@ module.exports = {
   allUsers,
   deletForm,
   updataForm,
-  deletAll
+  deletAll,
+  HomeImg,
 }

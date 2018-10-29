@@ -12,7 +12,8 @@ const UserSchema = new mongoose.Schema({
   username: String,
   password: String,
   token: String,
-  create_time: String
+  create_time: String,
+  HeadPortrait: String
 })
 //可以添加一些自定义的实例方法
 UserSchema.statics = {
@@ -26,7 +27,18 @@ UserSchema.statics = {
         }
       })
     })
-  }
+  },
+  updateForm(username, parameter) { // 修改数据
+    return new Promise((resolve, reject) => {
+      User.update(username, parameter, (err, raw) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(raw);
+        }
+      })
+    })
+  },
 }
 
 //生成模型，说白了就是创建一个集合
